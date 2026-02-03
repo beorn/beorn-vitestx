@@ -81,3 +81,15 @@ export {
 
 // Re-export random utilities
 export { createSeededRandom, parseSeed, type SeededRandom } from '../random.js'
+
+// Fuzz terms (Provider-based)
+export {
+	createFuzzTerm,
+	createReplayTerm,
+	type FuzzTermProvider,
+	type FuzzTermOptions,
+	type FuzzPick,
+	type FuzzState,
+	type ReplayTermProvider,
+	type ReplayTermOptions,
+} from '../fuzz/terms/index.js'
