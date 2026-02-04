@@ -5,8 +5,8 @@
  * durations, and categories with support for test retries.
  */
 
-import { createConditionalLogger } from "@beorn/logger"
-const log = createConditionalLogger("vitestx:dotz:store")
+import { createlogger } from "@beorn/logger"
+const log = createlogger("vitestx:dotz:store")
 
 // =============================================================================
 // Types
