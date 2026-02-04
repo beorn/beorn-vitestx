@@ -118,13 +118,16 @@ export function Report({
   console: patched,
 }: ReportProps) {
   const state = useStore(store)
+  // During live streaming, only show dots + summary to avoid exceeding terminal height.
+  // Full report (package table, slow tests, failures) is shown in final static output.
+  const isLive = state.isRunning
   return (
     <Box id="report" flexDirection="column">
       {patched && <Console console={patched} />}
       <DotsSection state={state} options={options} width={width} />
       <Summary state={state} />
-      <PackageTable state={state} />
-      <SlowTests state={state} options={options} />
+      {!isLive && <PackageTable state={state} />}
+      {!isLive && <SlowTests state={state} options={options} />}
       <Failures state={state} />
     </Box>
   )
