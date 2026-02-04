@@ -132,52 +132,125 @@ export function Report({
 
 // --- Dot rendering ---
 
-type DotProps =
-  | { testId: string; store: TestStoreState; options: Options }
-  | { status: "passed"; duration: number; options: Options }
-  | { status: StatusKey }
-
 export function StatusDot({ status }: { status: StatusKey }) {
   const { char, label: _, ...style } = STATUS_DOTS[status]
   return <Text {...style}>{char}</Text>
 }
 
+/** Single dot for legend use only. Bulk rendering uses DotStrip. */
+type DotProps =
+  | { status: "passed"; duration: number; options: Options }
+  | { status: StatusKey }
+
 export function Dot(props: DotProps) {
-  // Static status dots (legend use)
-  if ("status" in props && props.status !== "passed") {
-    return <StatusDot status={props.status} />
-  }
-
-  // Determine state and duration from store or props
-  const [testState, duration, isNoisy, options] =
-    "testId" in props
-      ? [
-          props.store.testStates.get(props.testId) ?? "pending",
-          props.store.testDurations.get(props.testId) ?? 0,
-          props.store.noisyTestIds.has(props.testId),
-          props.options,
-        ]
-      : ["passed" as TestState, props.duration, false, props.options]
-
-  // Noisy tests show ! (unless failed)
-  if (isNoisy && testState !== "failed") return <StatusDot status="noisy" />
-
-  // Non-passed states
-  if (testState in STATUS_DOTS) {
-    return <StatusDot status={testState as StatusKey} />
-  }
-
-  // Passed: duration-based symbol
+  if (props.status !== "passed") return <StatusDot status={props.status} />
   const { char, bright } = durationToSymbol(
-    duration,
-    options.slowThreshold,
-    options.symbols,
+    props.duration,
+    props.options.slowThreshold,
+    props.options.symbols,
   )
   return (
     <Text color="green" dim={!bright}>
       {char}
     </Text>
   )
+}
+
+/** Style key for grouping consecutive dots */
+type DotStyle = { color: string; dim: boolean; bold?: boolean }
+
+/** Resolve a test ID to its dot character and style */
+function resolveDot(
+  id: string,
+  state: TestStoreState,
+  options: Options,
+): { char: string; style: DotStyle } {
+  const testState = state.testStates.get(id) ?? "pending"
+  const isNoisy = state.noisyTestIds.has(id)
+
+  // Noisy (unless failed)
+  if (isNoisy && testState !== "failed") {
+    const dot = STATUS_DOTS.noisy
+    return { char: dot.char, style: { color: dot.color, dim: false } }
+  }
+
+  // Status dots (failed, skipped, pending)
+  if (testState in STATUS_DOTS) {
+    const dot = STATUS_DOTS[testState as StatusKey]
+    return {
+      char: dot.char,
+      style: { color: dot.color, dim: "dim" in dot && !!dot.dim },
+    }
+  }
+
+  // Passed: duration-based symbol
+  const duration = state.testDurations.get(id) ?? 0
+  const { char, bright } = durationToSymbol(
+    duration,
+    options.slowThreshold,
+    options.symbols,
+  )
+  return { char, style: { color: "green", dim: !bright } }
+}
+
+function styleKey(s: DotStyle): string {
+  return `${s.color}:${s.dim ? 1 : 0}`
+}
+
+/**
+ * Bulk dot renderer: renders a list of test IDs as grouped <Text> elements.
+ * Batches consecutive dots with the same style into single <Text> nodes.
+ * For 4700 tests, this produces ~10-50 React elements instead of 4700.
+ */
+export function DotStrip({
+  testIds,
+  state,
+  options,
+}: {
+  testIds: string[]
+  state: TestStoreState
+  options: Options
+}) {
+  const groups: ReactNode[] = []
+  let currentChars = ""
+  let currentStyle: DotStyle | null = null
+  let currentKey = ""
+
+  for (const id of testIds) {
+    const { char, style } = resolveDot(id, state, options)
+    const key = styleKey(style)
+    if (key === currentKey) {
+      currentChars += char
+    } else {
+      if (currentStyle && currentChars) {
+        groups.push(
+          <Text
+            key={groups.length}
+            color={currentStyle.color}
+            dim={currentStyle.dim}
+          >
+            {currentChars}
+          </Text>,
+        )
+      }
+      currentChars = char
+      currentStyle = style
+      currentKey = key
+    }
+  }
+  if (currentStyle && currentChars) {
+    groups.push(
+      <Text
+        key={groups.length}
+        color={currentStyle.color}
+        dim={currentStyle.dim}
+      >
+        {currentChars}
+      </Text>,
+    )
+  }
+
+  return <>{groups}</>
 }
 
 export function DurationSymbol({
@@ -259,36 +332,103 @@ function DotsSectionWithLayout(props: Omit<DotsSectionProps, "width">) {
   return <DotsSectionInner {...props} width={contentRect.width ?? 80} />
 }
 
+/** Per-package breakout analysis */
+interface PackageLayout {
+  category: string
+  wantsBreakout: boolean
+  linesIfBreakout: number
+  linesIfNot: number
+  fileCount: number
+}
+
+/** Screen-aware file breakout: breaks out files dynamically based on visual pressure and screen budget */
+function computeBreakouts(
+  state: TestStoreState,
+  maxLabelWidth: number,
+  dotsWidth: number,
+  screenHeight: number,
+): Set<string> {
+  const packages: PackageLayout[] = []
+
+  for (const category of state.categoryOrder) {
+    const catStats = state.categoryStats.get(category)
+    if (!catStats) continue
+
+    const totalDots = catStats.testIds.length
+    const packageLines = Math.ceil(totalDots / Math.max(1, dotsWidth))
+    const fileCount = catStats.fileOrder.length
+
+    // Break out when: >2 lines of dots, or >1 line with >3 files
+    const wantsBreakout =
+      fileCount > 1 && (packageLines > 2 || (packageLines > 1 && fileCount > 3))
+
+    // Lines if broken out: 1 header + 1 per file (each file's dots may wrap)
+    const linesIfBreakout = wantsBreakout
+      ? 1 +
+        catStats.fileOrder.reduce((sum, file) => {
+          const fileStats = catStats.files.get(file)
+          if (!fileStats) return sum + 1
+          const fileDotsWidth = dotsWidth
+          return (
+            sum +
+            Math.max(
+              1,
+              Math.ceil(fileStats.testIds.length / Math.max(1, fileDotsWidth)),
+            )
+          )
+        }, 0)
+      : packageLines
+
+    packages.push({
+      category,
+      wantsBreakout,
+      linesIfBreakout,
+      linesIfNot: packageLines,
+      fileCount,
+    })
+  }
+
+  // Budget: available screen lines for dots section (leave room for legend, summary, etc.)
+  const availableLines = Math.max(10, screenHeight - 10)
+  let totalLines = packages.reduce(
+    (sum, p) => sum + (p.wantsBreakout ? p.linesIfBreakout : p.linesIfNot),
+    0,
+  )
+
+  // If over budget, disable breakouts starting with smallest packages first
+  if (totalLines > availableLines) {
+    const sorted = [...packages]
+      .filter((p) => p.wantsBreakout)
+      .sort((a, b) => a.fileCount - b.fileCount)
+
+    for (const pkg of sorted) {
+      if (totalLines <= availableLines) break
+      pkg.wantsBreakout = false
+      totalLines -= pkg.linesIfBreakout - pkg.linesIfNot
+    }
+  }
+
+  return new Set(packages.filter((p) => p.wantsBreakout).map((p) => p.category))
+}
+
 function DotsSectionInner({
   state,
   options,
   width: cols,
 }: Omit<DotsSectionProps, "width"> & { width: number }) {
-  const maxLabelWidth = useMemo(
-    () =>
-      Math.min(
-        Math.max(...state.categoryOrder.map((c) => c.length), 12) + 1,
-        24,
-      ),
-    [state.categoryOrder],
+  const maxLabelWidth = Math.min(
+    Math.max(...state.categoryOrder.map((c) => c.length), 12) + 1,
+    24,
   )
   const dotsWidth = cols - maxLabelWidth - 1
 
-  // Break out files if category has many tests across multiple files
-  const fileBreakouts = useMemo(() => {
-    const set = new Set<string>()
-    for (const cat of state.categoryOrder) {
-      const stats = state.categoryStats.get(cat)
-      if (
-        stats &&
-        stats.testIds.length > dotsWidth &&
-        stats.fileOrder.length > 1
-      ) {
-        set.add(cat)
-      }
-    }
-    return set
-  }, [state.categoryOrder, state.categoryStats, dotsWidth])
+  // Screen-aware file breakout (recomputed each render — cheap O(categories) scan)
+  const fileBreakouts = computeBreakouts(
+    state,
+    maxLabelWidth,
+    dotsWidth,
+    process.stdout.rows || 40,
+  )
 
   return (
     <Box id="dots" flexDirection="column">
@@ -316,14 +456,11 @@ function DotsSectionInner({
                       <Text dim>{name.padEnd(maxLabelWidth - 2)}</Text>
                     </Box>
                     <Box flexDirection="row" flexWrap="wrap" width={dotsWidth}>
-                      {fileStats.testIds.map((id) => (
-                        <Dot
-                          key={id}
-                          testId={id}
-                          store={state}
-                          options={options}
-                        />
-                      ))}
+                      <DotStrip
+                        testIds={fileStats.testIds}
+                        state={state}
+                        options={options}
+                      />
                     </Box>
                   </Box>
                 )
@@ -338,9 +475,11 @@ function DotsSectionInner({
               <Text color="cyan">{category}</Text>
             </Box>
             <Box flexDirection="row" flexWrap="wrap" width={dotsWidth}>
-              {catStats.testIds.map((id) => (
-                <Dot key={id} testId={id} store={state} options={options} />
-              ))}
+              <DotStrip
+                testIds={catStats.testIds}
+                state={state}
+                options={options}
+              />
             </Box>
           </Box>
         )
@@ -678,12 +817,12 @@ class DotzReporter implements Reporter {
     this.scheduleFlush()
   }
 
-  /** Flush rendering at most once per frame (~16ms) for streaming output */
+  /** Flush rendering at most once per second for streaming output */
   private scheduleFlush() {
     if (!this.app || this.flushScheduled) return
     const now = Date.now()
     const elapsed = now - this.lastFlushTime
-    if (elapsed >= 16) {
+    if (elapsed >= 1000) {
       this.lastFlushTime = now
       this.app.flush()
     } else {
@@ -692,7 +831,7 @@ class DotzReporter implements Reporter {
         this.flushScheduled = false
         this.lastFlushTime = Date.now()
         this.app?.flush()
-      }, 16 - elapsed)
+      }, 1000 - elapsed)
     }
   }
 
@@ -720,6 +859,8 @@ class DotzReporter implements Reporter {
     this.store.setRunning(false)
 
     if (this.app) {
+      // Final flush to render any pending test results
+      this.app.flush()
       await new Promise<void>((resolve) => {
         setTimeout(resolve, UNMOUNT_DELAY_MS)
       })

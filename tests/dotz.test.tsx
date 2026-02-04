@@ -153,6 +153,69 @@ describe("Report", () => {
     })
   })
 
+  describe("file breakout", () => {
+    it("breaks out per-file when package has >2 lines of dots across files", () => {
+      // width=80, maxLabelWidth=13 ("big-package" + 1), dotsWidth=66
+      // 200 tests across 4 files → ~3 lines of dots → triggers breakout
+      const files = [
+        "alpha.test.ts",
+        "beta.test.ts",
+        "gamma.test.ts",
+        "delta.test.ts",
+      ]
+      for (let i = 0; i < 200; i++) {
+        const file = files[i % files.length]!
+        store.addTest(`t-${i}`, "big-package", file)
+        store.updateTest(`t-${i}`, "passed", 10)
+      }
+
+      const app = render(<Report store={store} options={options} width={80} />)
+      const text = app.text
+
+      // Should show per-file labels (without .test.ts extension)
+      expect(text).toContain("alpha")
+      expect(text).toContain("beta")
+      expect(text).toContain("gamma")
+      expect(text).toContain("delta")
+      // Category name should still appear
+      expect(text).toContain("big-package")
+    })
+
+    it("does not break out small packages with few tests", () => {
+      store.addTest("t1", "small-pkg", "one.test.ts")
+      store.addTest("t2", "small-pkg", "two.test.ts")
+      store.updateTest("t1", "passed", 10)
+      store.updateTest("t2", "passed", 10)
+
+      const app = render(<Report store={store} options={options} width={80} />)
+      const text = app.text
+
+      // Should show category but NOT per-file breakout
+      expect(text).toContain("small-pkg")
+      expect(text).not.toContain("one")
+      expect(text).not.toContain("two")
+    })
+
+    it("breaks out when >1 line with >3 files", () => {
+      // 70 tests across 4 files, >1 line (>66 dots) with >3 files
+      const files = ["a.test.ts", "b.test.ts", "c.test.ts", "d.test.ts"]
+      for (let i = 0; i < 70; i++) {
+        const file = files[i % files.length]!
+        store.addTest(`t-${i}`, "medium-pkg", file)
+        store.updateTest(`t-${i}`, "passed", 10)
+      }
+
+      const app = render(<Report store={store} options={options} width={80} />)
+      const text = app.text
+
+      // Per-file labels should appear
+      expect(text).toContain("medium-pkg")
+      // File names are shown without the .test.ts extension
+      expect(text).toMatch(/\ba\b/)
+      expect(text).toMatch(/\bb\b/)
+    })
+  })
+
   describe("slow tests display", () => {
     beforeEach(() => {
       store.addTest("test-1", "pkg-a", "file1.test.ts")
