@@ -124,7 +124,7 @@ export async function* delay<T>(
 ): AsyncGenerator<T> {
   for await (const item of source) {
     const ms = rng.int(minMs, maxMs)
-    await new Promise((r) => setTimeout(r, ms))
+    await new Promise((resolve) => setTimeout(resolve, ms))
     yield item
   }
 }
