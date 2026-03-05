@@ -9,7 +9,16 @@
 import * as fs from "node:fs"
 import React, { useMemo, useSyncExternalStore, type ReactNode } from "react"
 import type { Reporter, TestCase, TestModule, TestSpecification, TestSuite, Vitest } from "vitest/node"
-import { Box, Text, Console, useContentRect, patchConsole, type Instance, type Term, type PatchedConsole } from "@hightea/term"
+import {
+  Box,
+  Text,
+  Console,
+  useContentRect,
+  patchConsole,
+  type Instance,
+  type Term,
+  type PatchedConsole,
+} from "@hightea/term"
 import { createLogger } from "decant"
 
 import { createTestStore, type TestState, type TestStore, type TestStoreState } from "./store.js"

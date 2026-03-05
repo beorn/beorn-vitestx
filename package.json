@@ -44,8 +44,8 @@
     "vitest": "^4.0.0"
   },
   "peerDependencies": {
-    "decant": ">=0.1.0",
     "@hightea/term": ">=0.1.0",
+    "decant": ">=0.1.0",
     "react": ">=19.0.0",
     "vitest": ">=2.0.0"
   },
