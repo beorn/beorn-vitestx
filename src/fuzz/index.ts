@@ -80,4 +80,11 @@ export {
 } from "./regression.js"
 
 // Re-export random utilities
-export { createSeededRandom, weightedPickFromTuples, parseSeed, parseRepeats, deriveSeeds, type SeededRandom } from "../random.js"
+export {
+  createSeededRandom,
+  weightedPickFromTuples,
+  parseSeed,
+  parseRepeats,
+  deriveSeeds,
+  type SeededRandom,
+} from "../random.js"
