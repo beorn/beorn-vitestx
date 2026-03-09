@@ -1,6 +1,6 @@
-# vitestx Tests
+# vi-monkey Tests
 
-**Test Infrastructure — Vitest Extensions**: Fuzz testing, chaos streams, seeded RNG, environment config, and dotz reporter.
+**Test Infrastructure — Vitest Extensions**: Fuzz testing, chaos streams, seeded RNG, and environment config.
 
 ## What to Test Here
 
@@ -8,13 +8,10 @@
 - **Random**: `createSeededRandom` determinism, `int()`/`float()`/`pick()`/`shuffle()` range correctness, `parseSeed`
 - **Chaos transformers**: `drop`, `reorder`, `duplicate`, `burst`, `initGap`, `delay`, composed `chaos()` pipeline, `builtinChaosRegistry`
 - **Environment**: `getTestSys()` parsing (`fake`/`real:mem`/`real:disk`), `isRealSys()`, `isDiskSys()`, invalid value fallback
-- **Dotz reporter**: store-driven React rendering via `createTestStore`, test lifecycle (add/update), failure display, slow test threshold, width adaptation
-- **Dotz streaming**: incremental rendering via `flush()`, visible text changes after store updates
 
 ## What NOT to Test Here
 
-- Vitest internals or reporter protocol — vitestx bridges to them
-- silvery rendering details — dotz tests use `createRenderer` as a black box
+- Vitest internals or reporter protocol — vi-monkey bridges to them
 
 ## Patterns
 
@@ -32,32 +29,18 @@ test("gen is deterministic with same seed", async () => {
 })
 ```
 
-Dotz tests use `createTestStore` + `createRenderer` from silvery/testing:
-
-```typescript
-import { createTestStore } from "../src/dotz/store.js"
-import { Report } from "../src/dotz/index.tsx"
-
-const store = createTestStore(100)
-store.addTest("t1", "pkg", "file.test.ts")
-store.updateTest("t1", "passed", 10)
-const app = render(<Report store={store} options={options} width={80} />)
-expect(app.text).toContain("passed")
-```
-
 ## Ad-Hoc Testing
 
 ```bash
-bun vitest run vendor/vitestx/tests/              # All vitestx tests
-bun vitest run vendor/vitestx/tests/fuzz.fuzz.ts  # Fuzz API tests
-bun vitest run vendor/vitestx/tests/chaos.test.ts # Chaos transformers
-bun vitest run vendor/vitestx/tests/random.test.ts # Seeded RNG
-bun vitest run vendor/vitestx/tests/dotz.test.tsx  # Dotz reporter
+bun vitest run vendor/vi-monkey/tests/              # All vi-monkey tests
+bun vitest run vendor/vi-monkey/tests/fuzz.fuzz.ts  # Fuzz API tests
+bun vitest run vendor/vi-monkey/tests/chaos.test.ts # Chaos transformers
+bun vitest run vendor/vi-monkey/tests/random.test.ts # Seeded RNG
 ```
 
 ## Efficiency
 
-Pure logic tests are fast (~50ms). Dotz rendering tests (~200ms) due to silvery renderer. The `dotz-streaming` test uses real `silvery` render with suppressed stdout (~300ms).
+Pure logic tests are fast (~50ms).
 
 ## See Also
 

@@ -1,13 +1,13 @@
-# vitestx
+# vi-monkey
 
-Fuzz testing, chaos streams, and a streaming reporter for Vitest.
+Fuzz testing and chaos streams for [Vitest](https://vitest.dev/).
 
 ## Fuzz Testing
 
 Async generators with auto-shrinking, regression cases, and seeded RNG.
 
 ```typescript
-import { test, gen, take } from "vitestx"
+import { test, gen, take } from "vi-monkey"
 
 test.fuzz("cursor stays in bounds", async () => {
   for await (const key of take(gen(["j", "k", "h", "l"]), 100)) {
@@ -25,12 +25,8 @@ Generators support uniform arrays, weighted tuples, sync/async picker functions,
 Composable async iterable transformers that simulate unreliable delivery.
 
 ```typescript
-import { drop, reorder, chaos } from "vitestx/chaos"
+import { chaos, drop, reorder } from "vi-monkey/chaos"
 
-// Manual composition
-const unreliable = reorder(drop(source, 0.2, rng), 5, rng)
-
-// Declarative pipeline
 const chaotic = chaos(
   source,
   [
@@ -44,35 +40,19 @@ const chaotic = chaos(
 
 Built-in transformers: `drop`, `reorder`, `duplicate`, `burst`, `initGap`, `delay`. Extend with custom registries.
 
-## Dotz Reporter
-
-Streaming dot reporter with silvery React TUI. Duration-based symbols, per-package grouping, CI fallback.
-
-```typescript
-// vitest.config.ts
-export default defineConfig({
-  test: {
-    reporters: ["vitestx/dotz"],
-  },
-})
-```
-
-| Symbol | Meaning                               |
-| ------ | ------------------------------------- |
-| `·•●`  | Fast / medium / slow (duration-based) |
-| `x`    | Failed                                |
-| `-`    | Skipped                               |
-| `!`    | Noisy (console output)                |
-
 ## Install
 
 ```bash
-bun add vitestx
+bun add vi-monkey
 ```
 
-## Docs
+## Exports
 
-[vitestx.github.io](https://beorn.github.io/vitestx/)
+```typescript
+import { test, gen, take } from "vi-monkey"        // Fuzz testing
+import { chaos, drop, reorder } from "vi-monkey/chaos"  // Chaos streams
+import { viMonkeyPlugin } from "vi-monkey/plugin"   // Vitest plugin
+```
 
 ## License
 

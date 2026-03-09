@@ -1,23 +1,24 @@
 {
-  "name": "vitestx",
-  "version": "0.2.0",
-  "description": "Vitest extension with fuzz testing",
+  "name": "vi-monkey",
+  "version": "0.1.0",
+  "description": "Fuzz testing and chaos streams for Vitest",
   "keywords": [
     "fuzz",
     "fuzzing",
+    "chaos",
     "property-based-testing",
     "testing",
     "vitest"
   ],
-  "homepage": "https://beorn.github.io/vitestx/",
+  "homepage": "https://github.com/beorn/vi-monkey",
   "bugs": {
-    "url": "https://github.com/beorn/vitestx/issues"
+    "url": "https://github.com/beorn/vi-monkey/issues"
   },
   "license": "MIT",
   "author": "Beorn",
   "repository": {
     "type": "git",
-    "url": "https://github.com/beorn/vitestx.git"
+    "url": "https://github.com/beorn/vi-monkey.git"
   },
   "files": [
     "dist",
@@ -29,17 +30,13 @@
     ".": "./src/index.ts",
     "./plugin": "./src/plugin.ts",
     "./fuzz": "./src/fuzz/index.ts",
-    "./chaos": "./src/chaos/index.ts",
-    "./dotz": "./src/dotz/index.tsx"
+    "./chaos": "./src/chaos/index.ts"
   },
   "scripts": {
     "build": "tsc",
     "test": "vitest",
     "test:run": "vitest run",
-    "prepublishOnly": "bun run build",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
     "debug": "^4.4.0"
@@ -47,25 +44,9 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.9.3",
-    "vite": "^6.0.0",
-    "vitepress": "^1.6.4",
     "vitest": "^4.0.0"
   },
   "peerDependencies": {
-    "@silvery/react": ">=0.1.0",
-    "loggily": ">=0.1.0",
-    "react": ">=19.0.0",
     "vitest": ">=2.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@silvery/react": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    },
-    "loggily": {
-      "optional": true
-    }
   }
 }

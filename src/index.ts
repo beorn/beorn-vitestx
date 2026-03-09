@@ -1,5 +1,5 @@
 /**
- * vitestx - vitestx - Vitest extension with fuzz testing
+ * vi-monkey — Fuzz testing and chaos streams for Vitest
  */
 
 // Fuzz API (primary)

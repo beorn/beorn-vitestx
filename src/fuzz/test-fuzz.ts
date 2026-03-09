@@ -3,7 +3,7 @@
  *
  * Usage:
  * ```typescript
- * import { test } from 'vitestx/fuzz'
+ * import { test } from 'vi-monkey/fuzz'
  *
  * test.fuzz('cursor invariants', async () => {
  *   const handle = await run(<Board />, { cols: 80, rows: 24 })

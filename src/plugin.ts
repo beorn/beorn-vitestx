@@ -1,15 +1,15 @@
 /**
- * Unified vitest plugin for vitestx
+ * Vitest plugin for vi-monkey
  *
  * @example
  * ```typescript
  * // vitest.config.ts
  * import { defineConfig } from 'vitest/config'
- * import { vitestx } from 'vitestx/plugin'
+ * import { viMonkey } from 'vi-monkey/plugin'
  *
  * export default defineConfig({
  *   plugins: [
- *     vitestx({
+ *     viMonkey({
  *       fuzz: { iterations: 100 },
  *       ai: { model: 'claude-sonnet' },
  *       doc: { pattern: '**\/*.test.md' },
@@ -21,7 +21,7 @@
 
 import type { Plugin } from "vite"
 
-export interface VitestxFuzzOptions {
+export interface ViMonkeyFuzzOptions {
   /** Number of actions per test run (default: 100) */
   iterations?: number
   /** Seed source: 'env' reads FUZZ_SEED, 'random' generates new (default: 'env') */
@@ -35,7 +35,7 @@ export interface VitestxFuzzOptions {
   }
 }
 
-export interface VitestxAiOptions {
+export interface ViMonkeyAiOptions {
   /** Model identifier (Vercel AI SDK format) */
   model?: string
   /** Temperature for LLM (0 = deterministic) */
@@ -50,28 +50,28 @@ export interface VitestxAiOptions {
   provider?: "openai" | "anthropic" | "claude-code"
 }
 
-export interface VitestxDocOptions {
+export interface ViMonkeyDocOptions {
   /** Glob pattern for mdtest files */
   pattern?: string
 }
 
-export interface VitestxOptions {
+export interface ViMonkeyOptions {
   /** Fuzz mode configuration */
-  fuzz?: VitestxFuzzOptions
+  fuzz?: ViMonkeyFuzzOptions
   /** AI mode configuration */
-  ai?: VitestxAiOptions
+  ai?: ViMonkeyAiOptions
   /** Doc mode configuration (mdtest) */
-  doc?: VitestxDocOptions
+  doc?: ViMonkeyDocOptions
 }
 
 /**
- * Creates the vitestx plugin for Vitest
+ * Creates the vi-monkey plugin for Vitest
  */
-export function vitestx(options: VitestxOptions = {}): Plugin {
+export function viMonkey(options: ViMonkeyOptions = {}): Plugin {
   const { fuzz = {}, ai = {}, doc = {} } = options
 
   return {
-    name: "vitestx",
+    name: "vi-monkey",
 
     config() {
       // Configure vitest for custom modes
@@ -85,4 +85,4 @@ export function vitestx(options: VitestxOptions = {}): Plugin {
   }
 }
 
-export default vitestx
+export default viMonkey

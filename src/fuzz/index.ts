@@ -3,7 +3,7 @@
  *
  * @example
  * ```typescript
- * import { test, gen, take, createSeededRandom } from 'vitestx/fuzz'
+ * import { test, gen, take, createSeededRandom } from 'vi-monkey/fuzz'
  *
  * // Simple random from array
  * test('navigation', async () => {

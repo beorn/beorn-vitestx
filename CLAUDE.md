@@ -1,10 +1,10 @@
-# vitestx - Vitest Extension
+# vi-monkey — Fuzz Testing & Chaos Streams for Vitest
 
-Vitest extensions: fuzz testing (gen/take generators, test.fuzz() with auto-shrinking, chaos stream transformers) and dotz streaming reporter (silvery React terminal UI).
+Fuzz testing (gen/take generators, test.fuzz() with auto-shrinking) and chaos stream transformers for Vitest.
 
 ## Commands
 
-bun test vendor/vitestx/ # run tests
+bun test vendor/vi-monkey/ # run tests
 
 ## Architecture
 
@@ -18,21 +18,17 @@ src/
 │ ├── test-fuzz.ts # test.fuzz() wrapper with tracking
 │ ├── context.ts # FuzzContext for tracking state
 │ ├── shrink.ts # Delta-debugging shrink
-│ └── regression.ts # **fuzz_cases**/ save/load
-├── chaos/ # Chaos stream transformers
-│ └── index.ts # drop, reorder, duplicate, burst, initGap, delay + chaos()
-└── dotz/ # Streaming dot reporter
-├── index.tsx # DotzReporter class + React components
-└── store.ts # TestStore (useSyncExternalStore)
+│ └── regression.ts # __fuzz_cases__/ save/load
+└── chaos/ # Chaos stream transformers
+  └── index.ts # drop, reorder, duplicate, burst, initGap, delay + chaos()
 
 ## Subpath Exports
 
 ```typescript
-import { test, gen, take } from "vitestx" // Root: re-exports fuzz + utilities
-import { test, gen, take } from "vitestx/fuzz" // Fuzz: gen/take/test.fuzz/shrink/regression
-import { chaos, drop, reorder } from "vitestx/chaos" // Chaos: stream transformers
-import { vitestxPlugin } from "vitestx/plugin" // Vitest plugin
-// Dotz reporter: use as --reporter=vitestx/dotz
+import { test, gen, take } from "vi-monkey"          // Root: re-exports fuzz + utilities
+import { test, gen, take } from "vi-monkey/fuzz"      // Fuzz: gen/take/test.fuzz/shrink/regression
+import { chaos, drop, reorder } from "vi-monkey/chaos" // Chaos: stream transformers
+import { viMonkeyPlugin } from "vi-monkey/plugin"      // Vitest plugin
 ```
 
 ## Key APIs
@@ -50,7 +46,7 @@ take(generator, 100) — limit + auto-track for shrinking
 test.fuzz('name', async () => {
 for await (const key of take(gen(['j','k']), 100)) {
 await handle.press(key)
-expect(...) // On failure: auto-shrink, save to **fuzz_cases**/
+expect(...) // On failure: auto-shrink, save to __fuzz_cases__/
 }
 })
 
@@ -60,7 +56,7 @@ Composable async iterable transformers: drop, reorder, duplicate, burst, initGap
 Plus chaos() combinator with extensible ChaosRegistry<T>.
 
 ```typescript
-import { chaos, drop, reorder, builtinChaosRegistry } from "vitestx/chaos"
+import { chaos, drop, reorder, builtinChaosRegistry } from "vi-monkey/chaos"
 
 const chaotic = chaos(
   source,
@@ -70,49 +66,6 @@ const chaotic = chaos(
   ],
   rng,
 )
-```
-
-## Future Improvements
-
-All composable on the existing gen/take/test.fuzz primitives:
-
-**Preconditioned generators** — filter actions based on current state:
-
-```typescript
-gen((ctx) => {
-  const available = actions.filter((a) => preconditions[a]?.(getState()) ?? true)
-  return ctx.random.pick(available)
-})
-```
-
-**Automatic invariant checking** — check properties after every action:
-
-```typescript
-async function* withInvariants(source, check) {
-  for await (const item of source) {
-    yield item
-    check()
-  }
-}
-```
-
-**AI-driven exploration** — LLM picks actions via custom picker:
-
-```typescript
-gen(async (ctx) => {
-  const state = describeState(getState())
-  return await askLLM(`Given state: ${state}, pick from: ${actions}`)
-})
-```
-
-**Strategy comparison** — run same test with different generators:
-
-```typescript
-for (const strategy of [uniformGen, weightedGen, aiGen]) {
-  test.fuzz(`invariants hold (${strategy.name})`, async () => {
-    for await (const key of take(strategy, 100)) { ... }
-  })
-}
 ```
 
 ## Code Style
