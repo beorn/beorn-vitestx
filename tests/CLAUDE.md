@@ -32,10 +32,10 @@ test("gen is deterministic with same seed", async () => {
 ## Ad-Hoc Testing
 
 ```bash
-bun vitest run vendor/vi-monkey/tests/              # All vi-monkey tests
-bun vitest run vendor/vi-monkey/tests/fuzz.fuzz.ts  # Fuzz API tests
-bun vitest run vendor/vi-monkey/tests/chaos.test.ts # Chaos transformers
-bun vitest run vendor/vi-monkey/tests/random.test.ts # Seeded RNG
+bun vitest run tests/              # All vi-monkey tests
+bun vitest run tests/fuzz.fuzz.ts  # Fuzz API tests
+bun vitest run tests/chaos.test.ts # Chaos transformers
+bun vitest run tests/random.test.ts # Seeded RNG
 ```
 
 ## Efficiency

@@ -4,7 +4,7 @@ Fuzz testing (gen/take generators, test.fuzz() with auto-shrinking) and chaos st
 
 ## Commands
 
-bun test vendor/vi-monkey/ # run tests
+bun test # run tests
 
 ## Architecture
 
