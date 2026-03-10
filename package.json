@@ -21,8 +21,8 @@
     "url": "https://github.com/beorn/vi-monkey.git"
   },
   "files": [
-    "dist",
-    "README.md"
+    "src",
+    "dist"
   ],
   "type": "module",
   "module": "./src/index.ts",
@@ -31,6 +31,9 @@
     "./plugin": "./src/plugin.ts",
     "./fuzz": "./src/fuzz/index.ts",
     "./chaos": "./src/chaos/index.ts"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",

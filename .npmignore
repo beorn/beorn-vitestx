@@ -1,0 +1,15 @@
+# Tests
+tests/
+**/*.test.ts
+**/*.spec.ts
+
+# Development config
+.github/
+.githooks/
+.claude/
+vitest.config.ts
+tsconfig.json
+bun.lock
+
+# Build artifacts
+node_modules/
