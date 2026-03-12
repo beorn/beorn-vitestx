@@ -10,7 +10,7 @@ bun test # run tests
 
 src/
 ├── index.ts # Public API (re-exports fuzz)
-├── plugin.ts # Vitest plugin
+├── plugin.ts # Vitest plugin (stub — config injection, custom CLI modes)
 ├── env.ts # TEST_SYS environment handling
 ├── random.ts # Seeded RNG (LCG algorithm)
 ├── fuzz/ # Fuzz testing API

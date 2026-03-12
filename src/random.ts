@@ -34,10 +34,11 @@ export interface SeededRandom {
   fork(): SeededRandom
 }
 
-// LCG constants (same as glibc)
-const LCG_A = 1103515245
-const LCG_C = 12345
-const LCG_M = 2 ** 31
+// Linear Congruential Generator constants (same as glibc's rand()).
+// Full period of 2^31. See Numerical Recipes §7.1 or Knuth TAOCP Vol 2 §3.2.1.
+const LCG_A = 1103515245 // multiplier
+const LCG_C = 12345 // increment
+const LCG_M = 2 ** 31 // modulus (2^31)
 
 /**
  * Pick a random element from weighted tuples using a pre-generated random float.

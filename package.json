@@ -50,6 +50,6 @@
     "vitest": "^4.0.0"
   },
   "peerDependencies": {
-    "vitest": ">=2.0.0"
+    "vitest": ">=4.0.0"
   }
 }
