@@ -29,8 +29,7 @@
     "url": "https://github.com/beorn/vimonkey.git"
   },
   "files": [
-    "src",
-    "dist"
+    "src"
   ],
   "type": "module",
   "module": "./src/index.ts",
@@ -59,5 +58,8 @@
   },
   "peerDependencies": {
     "vitest": ">=4.0.0"
+  },
+  "engines": {
+    "node": ">=23.6.0"
   }
 }
