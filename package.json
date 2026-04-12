@@ -47,22 +47,6 @@
       "./chaos": "./dist/chaos/index.mjs"
     }
   },
-  "tsdown": {
-    "entry": [
-      "src/index.ts",
-      "src/plugin.ts",
-      "src/fuzz/index.ts",
-      "src/chaos/index.ts"
-    ],
-    "format": "esm",
-    "dts": false,
-    "clean": true,
-    "external": [
-      "vitest",
-      "vitest/node",
-      "debug"
-    ]
-  },
   "scripts": {
     "build": "tsdown",
     "test": "vitest",
@@ -78,6 +62,22 @@
   },
   "peerDependencies": {
     "vitest": ">=4.0.0"
+  },
+  "tsdown": {
+    "clean": true,
+    "dts": false,
+    "entry": [
+      "src/index.ts",
+      "src/plugin.ts",
+      "src/fuzz/index.ts",
+      "src/chaos/index.ts"
+    ],
+    "external": [
+      "vitest",
+      "vitest/node",
+      "debug"
+    ],
+    "format": "esm"
   },
   "engines": {
     "node": ">=23.6.0"
