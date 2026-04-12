@@ -1,6 +1,6 @@
 {
   "name": "vimonkey",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Fuzz testing with auto-shrinking and composable chaos stream transformers for Vitest",
   "keywords": [
     "async-generator",

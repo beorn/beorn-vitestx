@@ -1,0 +1,11 @@
+{
+  "repoName": "vimonkey",
+  "version": "0.2.4",
+  "packages": {
+    "vimonkey": {
+      "bumped": true,
+      "built": true,
+      "verified": true
+    }
+  }
+}
