@@ -1,6 +1,6 @@
 {
   "name": "vimonkey",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Fuzz testing with auto-shrinking and composable chaos stream transformers for Vitest",
   "keywords": [
     "async-generator",
@@ -23,16 +23,15 @@
     "url": "https://github.com/beorn/vimonkey/issues"
   },
   "license": "MIT",
-  "author": "Beorn",
+  "author": "Bjørn Stabell <bjorn@stabell.org>",
   "repository": {
     "type": "git",
     "url": "https://github.com/beorn/vimonkey.git"
   },
   "files": [
-    "src"
+    "dist"
   ],
   "type": "module",
-  "module": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
     "./plugin": "./src/plugin.ts",
@@ -40,13 +39,34 @@
     "./chaos": "./src/chaos/index.ts"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./plugin": "./dist/plugin.mjs",
+      "./fuzz": "./dist/fuzz/index.mjs",
+      "./chaos": "./dist/chaos/index.mjs"
+    }
+  },
+  "tsdown": {
+    "entry": [
+      "src/index.ts",
+      "src/plugin.ts",
+      "src/fuzz/index.ts",
+      "src/chaos/index.ts"
+    ],
+    "format": "esm",
+    "dts": false,
+    "clean": true,
+    "external": [
+      "vitest",
+      "vitest/node",
+      "debug"
+    ]
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsdown",
     "test": "vitest",
-    "test:run": "vitest run",
-    "prepublishOnly": "bun run build"
+    "test:run": "vitest run"
   },
   "dependencies": {
     "debug": "^4.4.0"
